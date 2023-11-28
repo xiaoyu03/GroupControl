@@ -1,38 +1,40 @@
 define("version", "9.0.u1254303");
 define("resolution", "1080*1920");
 define("requireVersion", "3.4.0");
-var device = Device.searchObject(sigmaConst.DevSelectOne);
+
 // 创建手机对象
-// var device = Device.getMain();
-if (!device) {
-//    print(device.name + "Cannot find device");
-    throw "Cannot find device";
-};
-var caij_end = []
-var keyAll = []
-var authorAll = []
-var count = 0
-const dic = {}
-var key_dict = {'水乳推荐': ['水乳二合一！我要锁死这瓶！'],'好人家':['所有的快乐都源于好人家']}
-for (var o = 0; o < 3; o++) {
+
+ var device = Device.searchObject(sigmaConst.DevSelectOne);
+ if (!device) {
+     throw "Cannot find device";
+  }
+
+printf(device.name)
+
+var excelPath = "C:/Users/mac/Desktop/data/key.xlsx"
+
+var cajiEnd = [];
+var keyAll = [];
+var authorAll = [];
+var count = 0;
+const dic = {};
+var keyDict = {'水乳推荐': ['水乳二合一！我要锁死这瓶！'],'好人家':['所有的快乐都源于好人家']};
+
+
+for (var i = 0; i < 3; i++) {
     try {
-        var runAppName = "com.xingin.xhs"
+        var runAppName = "com.xingin.xhs";
         var runapp = device.runApp(runAppName);
         delay(3000);
         if (runapp == 0) {
-            ret = get_Activity()
-            if (ret.indexOf('intersitial.ui') != -1) {
-                device.click(960, 130, tcConst.STATE_PRESS);
-//                print(device.name + "关闭广告");
-                delay(1000);
-            }
-            run(key_dict)
-            writeEx(keyAll,authorAll)
-            printf(keyAll)
+            ret = get_Activity();
+            run(keyDict);
+            writeEx(keyAll,authorAll);
+            printf(keyAll);
             delay(1000);
             device.closeApp(runAppName);
-            print(device.name + "-----------结束")
-            break
+            print(device.name + "-----------结束");
+            break;
         } else {
             print(device.name + '打开小红书失败');
             delay(2000);
@@ -42,8 +44,6 @@ for (var o = 0; o < 3; o++) {
     }
 
 }
-
-
 
 function reload() {
     device.send(tcConst.KEY_RECENTAPP);
@@ -73,9 +73,9 @@ function personate_list(num) {
         for (var ii = 0; ii < 3; ii++) {
             device.click(randomNum(100, 1000), randomNum(500, 2000), tcConst.STATE_PRESS);
             delay(1000)
-            var detail_activity4 = get_Activity();
+            var detailActivity4 = get_Activity();
             //  判断是否为详情页
-            if (detail_activity4.indexOf("notedetail.NoteDetailActivity") != -1 || detail_activity4.indexOf("detail.activity.DetailFeedActivity")) {
+            if (detailActivity4.indexOf("notedetail.NoteDetailActivity") != -1 || detailActivity4.indexOf("detail.activity.DetailFeedActivity")) {
 //                print(device.name + '列表页随机点击')
                 personate_detail('3')
                 break
@@ -94,9 +94,9 @@ function personate_detail(detail_type) {
             device.move(tcConst.movement.shiftDown);
         }
         delay(randomNum(1000, 3000));
-        var detail_activity3 = get_Activity();
+        var detailActivity3 = get_Activity();
         //  判断是否为详情页
-        if (detail_activity3.indexOf("search") == -1) {
+        if (detailActivity3.indexOf("search") == -1) {
             device.send(tcConst.keyCodes.KEYCODE_BACK, tcConst.STATE_PRESS);
             delay(1000);
         }        // 选定内容页面
@@ -126,6 +126,7 @@ function personate_detail(detail_type) {
 }
 // 作者页面随机
 function author_info(detail_type) {
+    printf("进入作者页面")
     var num = randomNum(1, 10)
     var author_click = false
     for (var i = 0; i < 3; i++) {
@@ -145,6 +146,7 @@ function author_info(detail_type) {
     delay(1000);
 //    print(device.name + '进入作者页面')
     // 作者页面下滑
+    delay(3000)
     for (var i = 0; i < randomNum(2, 4); i++) {
         device.move(tcConst.movement.shiftDown);
         delay(randomNum(1000, 3000));
@@ -165,7 +167,7 @@ function error() {
     }}
 }
 function writeEx(keyAll, authorAll) {
-  var existingData = excelUtils.readExcel("C:/Users/mac/Desktop/data/key.xlsx", "Sheet1");
+  var existingData = excelUtils.readExcel(excelPath, "Sheet1");
 
   var startingRow = 0;
 
@@ -177,13 +179,13 @@ function writeEx(keyAll, authorAll) {
 
   for (var i = 0; i < keyAll.length; i++) {
     var row = [];
-    row.push(key_dict);
+    row.push(keyDict);
     row.push(keyAll[i]);
     row.push(authorAll[i]);
     data.push(row);
   }
 
-  var ret = excelUtils.writeExcel("C:/Users/mac/Desktop/data/key.xlsx", "Sheet1",0 , startingRow, data);
+  var ret = excelUtils.writeExcel(excelPath, "Sheet1",0 , startingRow, data);
 
   if (ret == true) {
     console.log("Successfully written to excel");
@@ -195,56 +197,58 @@ function writeEx(keyAll, authorAll) {
 
 
 
-function click_key(author_key, gjc) {
+function click_key(keyTitle, gjc) {
     var tt = false
-    bij_ids = ''
-//    delay(500);
-    author_key2 = author_key.split('&&')
-    var img = device.sendAai({ query: "T:*" + author_key2[0] + "*", action: "getBounds" });
-    if (img&&author_key2.length!=1){
+    bijIds = ''
+    keyTitle2 = keyTitle.split('&&')
+    var img = device.sendAai({ query: "T:*" + keyTitle2[0] + "*", action: "getBounds" });
+    if (img&&keyTitle2.length!=1){
         for (i = 0; i < img.ids.length; i++) {
             for (j = 0; j < 3; j++) {
                 t = device.sendAai({ query: "ID:"+img.ids[i], action: "getText" });
                 if (t){
-                     if(t.retval.indexOf(author_key2[1])!=-1){
-                        bij_ids = img.ids[i]
+                     if(t.retval.indexOf(keyTitle2[1])!=-1){
+                        bijIds = img.ids[i]
                      }
                     break
                 }
             }
-            if (bij_ids){break}
+            if (bijIds){break}
         }
-    } else if (img&&author_key2.length==1) {
-        bij_ids = img.ids[0]
+    } else if (img&&keyTitle2.length==1) {
+        bijIds = img.ids[0]
     }
-//    print(bij_ids)
-    if (bij_ids) {
+    delay(1000)
+
+//    print(bijIds)
+    if (bijIds) {
         delay(500);
         if (img.bounds[0][1] < 200) {
             tt = true
             device.move(tcConst.movement.shiftUp);
             delay(1000);
         }
-        device.sendAai({ query: "ID:" + bij_ids, action: "click" })
+        device.sendAai({ query: "ID:" + bijIds, action: "click" })
         delay(500);
-        var detail_activity = get_Activity();
+        var author = device.sendAai({ query: "C:.TextView&&R:.nickNameTV", action: "getText" });
+        printf("作者名字"+author)
+        var detailActivity = get_Activity();
         //  判断是否为详情页
-        if (detail_activity.indexOf("search.GlobalSearchActivity") == -1) {
+        if (detailActivity.indexOf("search.GlobalSearchActivity") == -1) {
             try {
-                if (detail_activity.indexOf("notedetail.NoteDetailActivity") != -1) {
+                if (detailActivity.indexOf("notedetail.NoteDetailActivity") != -1) {
                     personate_detail("1")
-
-                    delay(1000);
+                    delay(3000);
                     device.move(tcConst.movement.shiftDown);
                     // 作者
                     for (i=0; i<2; i++){
-                         var author = device.sendAai({ query: "C:.TextView&&R:.nickNameTV", action: "getText" });
+                         delay(5000)
                          if (author){break}
                     }
                     // 标题
-                    var title = device.sendAai({ query: "C:.TextView&&R:.ebx", action: "getText" });
+                    var title = device.sendAai({ query: "C:.TextView&&R:.d44", action: "getText" });
                 }
-                if (detail_activity.indexOf("detail.activity.DetailFeedActivity") != -1) {
+                if (detailActivity.indexOf("detail.activity.DetailFeedActivity") != -1) {
                     for (i=0; i<2; i++){
                         var author = device.sendAai({ query: "C:.TextView&&R:.matrixNickNameView", action: "getText" });
                         if (author){break}
@@ -260,20 +264,20 @@ function click_key(author_key, gjc) {
                     title = { 'retval': '' };;
                 };
                   count = count + 1
-                  printf(device.name + '查找到关键词：' + author_key + '共' + count +  '次' + '  搜索词:' + gjc + '  作者' + author)
+                  printf(device.name + '查找到关键词：' + keyTitle + '共' + count +  '次' + '  搜索词:' + gjc + '  作者' + author)
 
                   // 存储关键词 keyAll
-                  keyAll.push(author_key)
+                  keyAll.push(keyTitle)
                   authorAll.push(author)
-                caij_end.push(author_key)
+                cajiEnd.push(keyTitle)
             } catch (err) {
                 print(device.name + "错误描述11：" + err.message);
                 delay(1000);
             }
             for (var i = 0; i < 3; i++) {
-                var detail_activity2 = get_Activity();
+                var detailActivity2 = get_Activity();
                 //  判断是否为详情页
-                if (detail_activity2.indexOf("search.GlobalSearchActivity") == -1) {
+                if (detailActivity2.indexOf("search.GlobalSearchActivity") == -1) {
                     device.send(tcConst.keyCodes.KEYCODE_BACK, tcConst.STATE_PRESS);
                     delay(1000);
                 }
@@ -287,44 +291,41 @@ function click_key(author_key, gjc) {
 }
 
 // 滑动页面
-function search_key(author_key, key) {
+function search_key(keyTitle, key) {
     var ls = ''
-    caij_end = []
+    cajiEnd = []
     for (var i = 0; i < 20; i++) {
         error()
-
         for (var x = 0; x < 2; x++) {
-            for (var z = 0; z < author_key.length; z++) {
-                click_key(author_key[z], key);
+            for (var z = 0; z < keyTitle.length; z++) {
+                click_key(keyTitle[z], key);
             }
-            if (caij_end && author_key) {
-                for (var j = 0; j < caij_end.length; j++) {
-                    if (author_key.indexOf(caij_end[j]) != -1) {
-                        author_key.splice(author_key.indexOf(caij_end[j]), 1)
-                        print(device.name + "关键词:" + key + "   已经完成:" + caij_end + '  未完成:' + author_key)
+            if (cajiEnd && keyTitle) {
+                for (var j = 0; j < cajiEnd.length; j++) {
+                    if (keyTitle.indexOf(cajiEnd[j]) != -1) {
+                        keyTitle.splice(keyTitle.indexOf(cajiEnd[j]), 1)
+                        print(device.name + "关键词:" + key + "   已经完成:" + cajiEnd + '  未完成:' + keyTitle)
                     }
                 }
             }
 
         }
-        if (author_key.length == 0) {
+        if (keyTitle.length == 0) {
             break
         }
         // 下滑
         var slide = device.move(tcConst.movement.shiftDown);
-        delay(1000);
+        delay(500);
     }
 }
 
-function run(key_dict) {
-//    print(device.name + "打开小红书");
+function run(keyDict) {
     if (get_Activity().indexOf('update') != -1)
     {
         device.sendAai({ query: "C:.ImageView&&R:.az9", action: "click" });
     }
-    //对坐标(123,254)进行点击操作（按下+弹起）
-    for (var key in key_dict) {
-        for (var q = 0; q < 3; q++) {
+    for (var key in keyDict) {
+        for (var i = 0; i < 3; i++) {
             if (get_Activity().indexOf('index') != -1) {
                 device.click(970, 140, tcConst.STATE_PRESS);
 //                print(device.name + "进入小红书搜索页");
@@ -335,18 +336,12 @@ function run(key_dict) {
             try {
                 // 输入关键
                 var keyword = device.inputTextSync(0, key);
-                // var keyword =  device.inputText(key)
-//                print(device.name + keyword)
                 delay(1000);
                 var search_text = device.sendAai({ query: "C:.EditText&&R:.ceo", action: "getText" });
-
-//                print(device.name + search_text)
                 if (keyword == true &&  search_text.retval.replace(/搜索,/g,"") == key) {
-//                    print(device.name + "输入：" + key);
                     break;
                 } else {
                     delay(500);
-//                    print(device.name + '输入关键词错误  '+ search_text + keyword);
                     device.send(tcConst.keyCodes.KEYCODE_BACK, tcConst.STATE_PRESS);
                 }
             } catch (err) {
@@ -357,8 +352,8 @@ function run(key_dict) {
         // 点击搜索按钮
         device.sendAai({ query: "C:.Button&&R:.cet", action: "click" });
         // 滑动页面
-        search_key(key_dict[key], key)
-
+        delay(1000)
+        search_key(keyDict[key], key)
     }
 }
 
